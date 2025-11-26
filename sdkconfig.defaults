@@ -1,0 +1,6 @@
+# sdkconfig.defaults (nella root del progetto)
+# Seleziona il controller USB JTAG come principale
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+
+# Disabilita l'uso della UART tradizionale per la console
+CONFIG_ESP_CONSOLE_NONE=y

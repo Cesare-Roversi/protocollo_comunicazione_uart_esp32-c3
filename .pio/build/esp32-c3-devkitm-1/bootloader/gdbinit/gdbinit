@@ -1,0 +1,2 @@
+source /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader/gdbinit/symbols
+source /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader/gdbinit/connect

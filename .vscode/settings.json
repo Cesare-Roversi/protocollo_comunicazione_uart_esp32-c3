@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "bit": "c",
+        "charconv": "c",
+        "compare": "c",
+        "cstddef": "c",
+        "string": "c",
+        "optional": "c",
+        "format": "c",
+        "limits": "c",
+        "memory": "c",
+        "new": "c",
+        "text_encoding": "c",
+        "functional": "c"
+    }
+}

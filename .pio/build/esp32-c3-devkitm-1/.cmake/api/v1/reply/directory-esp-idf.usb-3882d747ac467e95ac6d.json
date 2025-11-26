@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "esp-idf/usb",
+		"source" : "/home/cesarov/.platformio/packages/framework-espidf/components/usb"
+	}
+}

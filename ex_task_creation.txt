@@ -1,0 +1,50 @@
+//INFO PER CREARE TASK
+// xTaskCreate(
+//     TaskFunction_t pvTaskCode,  // pointer to the task function
+//     const char * const pcName,  // task name
+//     uint32_t usStackDepth,      // stack size in words, 1 word = 4 bytes
+//     void *pvParameters,         // pointer to data passed to task (can be NULL)
+//     UBaseType_t uxPriority,     // task priority (higher = better, [0-24])
+//     TaskHandle_t *pxCreatedTask // optional pointer to store task handle (can be NULL),
+                                   // resume/stop/delete/notify/checkstate
+// );
+
+#include <stdio.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/gpio.h"
+
+#define LED_GPIO 8
+
+
+TaskHandle_t handle_task_led;
+
+void task_led(void *info){
+  gpio_reset_pin(LED_GPIO);
+  gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
+
+  while(1){
+    gpio_set_level(LED_GPIO, 1);
+    vTaskDelay(pdMS_TO_TICKS(400));
+    gpio_set_level(LED_GPIO, 0);
+    vTaskDelay(pdMS_TO_TICKS(400));
+  }
+}
+
+void task_timeout(void *info){
+  while(1){
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    vTaskSuspend(handle_task_led);
+    vTaskDelay(pdMS_TO_TICKS(5000));
+    vTaskResume(handle_task_led);
+  }
+}
+
+
+void app_main(void)
+{
+  xTaskCreate(task_led, "task_led", 2048, NULL, 5, &handle_task_led);
+  xTaskCreate(task_timeout, "task_timeout", 2048, NULL, 5, NULL);
+
+}
+
