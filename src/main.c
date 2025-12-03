@@ -1,75 +1,3 @@
-/*
-- INFO: PER CREARE TASK
-xTaskCreate(
-    TaskFunction_t pvTaskCode,  / pointer to the task function
-    const char * const pcName,  / task name 
-    uint32_t usStackDepth,      / stack size in words, 1 word = 4 bytes
-    void *pvParameters,         / pointer to data passed to task (can be NULL)
-    UBaseType_t uxPriority,     / task priority (higher = better, [0-24])
-    TaskHandle_t *pxCreatedTask / optional pointer to store task handle (can be NULL), 
-                                / esume/stop/delete/notify/checkstate
-);
-
-NON puoi creare task vuote, se raggiungono l'ultima graffa crashano, fai così:
-void task_send_uart(void *arg){
-    while(1) {
-        vTaskDelay(pdMS_TO_TICKS(1000)); 
-    }
-}
-
-
-- INFO: READ UART
-
-int len = uart_read_bytes(U_SLAVE, data, BUF_SIZE - 1, pdMS_TO_TICKS(1000));
-IL DELAY SERVE PERCHÈ QUELLA PARTICOLARE TASK PUÒ LEGGERE MESSAGGI SOLO METRE È BLOCCATA
-SU uart_read_bytes(), OGNI VOLTA CHE RUNNA LA FUNZIONE SI BLOCCA E LEGGE MESSAGGI,
-SE ARRIVANO MESSAGGI MENTRE LA TASK FACEVA ALTRO SI METTONO IN UNA CODA INTERNA DELL'ESP.
-
-portMAX_DELAY = ASPETTA X SEMPRE
-
-La ESP32 ha 2 buffer:
-1.RX buffer, mantenuti fino a lettura da  uart_read_bytes()
-2.TX buffer, mantenuti fino a trasmissione effettiva
-
-per le struct sei costretto a leggere i byte nel mentre che arrivano, se non li leggi
-si accumulano nel buffer della esp e magari lo riempiono;
-
-anche mandare struct è un problema, sotto manda a ogni botta tutti i byte che sono disponibili
-nel buffer di invio dell'esp (ptrebbero essere < size(msg))
-
-
-- INFO: CODE
-QueueHandle_t q = xQueueCreate(1, sizeof(int));
-
-xQueueSend(q, &v, portMAX_DELAY);
-xQueueReceive(q, &v, portMAX_DELAY);
-
-il terzo parametro indica il tempo max che la task resta a aspettare sulla funzione se coda troppo piena/vuota,
-se timeout != portMAX_DELAY allora restituisce pdPASS o pdFAIL, controllalo;
-
-xQueueSend(info_uart->select_queue, &msg, portMAX_DELAY);
-!Send e Receve vogliono il puntatore a cio che è da copiare nella/dalla coda, 
-!ES: se vuoi copiare Msg*, vuole Msg**
-ES:
-Q = xQueueCreate(10, sizeof(Msg*));
-
-Msg* v = ...;
-xQueueSend(Q, (Msg**)v, portMAX_DELAY);
-
-///Passo il riferimento all'istanza di v
-///Internamente alla funzione:
-Msg* v = *(Msg**)RIF ///lo stesso v
-
-
-- DEBUGGARE 
-vTaskDelay(pdMS_TO_TICKS(1000)); 
-!1. FAI UPLOAD E MONITOR, 
-!2. DAGLI IL TEMPO AL MONTOR DI PARTIRE IMPOSTANDO UN DELAY NEL MAIN
-!(LA SCHEDA NON ASPETTA CHE PALTFORMIO ABBIA APERTO IL MONITOR SERIALE)
-*/
-
-
-
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -92,14 +20,22 @@ vTaskDelay(pdMS_TO_TICKS(1000));
 
 //ids
 #define ROOT_ID 0 //perchè sì
+#define UNKNOWN_ID -1
+#define INVALID_ID -2 
+
 uint8_t MASTER_ID = 0; //li ho hardcodati nel mockup c'è un protocollo di hello che forse funziona
 uint8_t SELF_ID = 1;
 uint8_t SLAVE_ID = 2;
 
 //handles:
 TaskHandle_t h_task_led;
+
+//code x tutti i tipi di comandi diversi
 QueueHandle_t h_queue_command_01;
 QueueHandle_t h_queue_command_02;
+QueueHandle_t h_queue_handshake;
+
+//code x inviare messaggi
 QueueHandle_t h_queue_send_to_slave;
 QueueHandle_t h_queue_send_to_master;
 
@@ -153,6 +89,10 @@ void sort_new_msg(Msg *msg){
     xQueueSend(h_queue_command_01, &msg, portMAX_DELAY);
   }else if (msg->type == type_command_02){
     xQueueSend(h_queue_command_02, &msg, portMAX_DELAY);
+  }else if (msg->type == type_handshake){
+    xQueueSend(h_queue_handshake, &msg, portMAX_DELAY);
+  }else{
+    printf("ERRORE: type: %i , non esiste\n", msg->type);
   }
   //....
 }
@@ -257,7 +197,7 @@ void task_execute_command_02(void *arg){
   }
 }
 
-//* _______________________________________ ON START
+//* _______________________________________ ON START (LED + INIT UART)
 
 int L_DELAY = 200;
 void task_led(void *info){
@@ -292,6 +232,114 @@ void init_uart(uart_port_t uart_num, int rx_pin, int tx_pin) {
 }
 
 
+//* _______________________________________ GESTIONE DI HANDSHAKE
+void send_handshake_msg(int to_whom, HandshakeType handshake_type){
+  Msg* hello_msg = malloc(sizeof(Msg));
+  hello_msg->sender_id = SELF_ID;
+  hello_msg->target_id = to_whom; //-1 = IDK
+  hello_msg->type = type_handshake;
+  hello_msg->payload.payload_handshake.type = handshake_type;
+  hello_msg->payload.payload_handshake.my_id = SELF_ID;
+  hello_msg->payload.payload_handshake.my_master_id = MASTER_ID;
+  hello_msg->payload.payload_handshake.my_master_id = SLAVE_ID;
+
+  if(handshake_type == type_hello){
+    if(to_whom == -1 || to_whom == MASTER_ID){
+      xQueueSend(h_queue_send_to_master, &hello_msg, portMAX_DELAY);
+    }else if(to_whom == SLAVE_ID){
+      xQueueSend(h_queue_send_to_slave, &hello_msg, portMAX_DELAY);
+    }else{
+      printf("ERRORE: type_hello è solo valido tra nodi adiacenti\n");
+    }
+
+  }else if(handshake_type == type_report_to_root){
+    if(to_whom == 0){
+      xQueueSend(h_queue_send_to_master, &hello_msg, portMAX_DELAY);
+    }else{
+      printf("ERRORE: type_report_to_root è mandato unicamente a ROOT\n");
+    }
+
+  }else{
+    printf("ERRORE: handshake_type: %i , non esiste\n", handshake_type);
+  }
+  
+}
+
+
+void handle_hello(){
+  Msg *msg = NULL;
+  xQueueReceive(h_queue_handshake, &msg, portMAX_DELAY);
+  if(msg->target_id == -1){
+    if(SLAVE_ID == -1){
+      SLAVE_ID = msg->payload.payload_handshake.my_id;
+      send_hello(SLAVE_ID);
+    }else{
+      printf("ERRORE: IO ho già uno slave\n");
+    }
+  }
+}
+
+
+//TODO _______________________________________ SOLO MASTER - MAPPA NODI
+#define NODES_ARR_SIZE 10 
+
+typedef struct{
+  int id;
+  int master_id;
+  int slave_id;
+}node;
+node nodes_arr[NODES_ARR_SIZE];
+int nodes_arr_len =0;
+
+void print_nodes_arr_len(){
+
+}
+
+void init_nodes_arr(){
+  nodes_arr[0] = (node){.id=0, .master_id=-2, .slave_id=-1};
+  nodes_arr_len = 1;
+}
+
+int find_and_update(int id, int master_id, int slave_id){
+
+  for(int i=0; i<nodes_arr_len; i++){
+    if(nodes_arr[i].id == id){
+      if(master_id >= 0){ //se non è -1 (INFO VECCHIA? assumo sia aggiornato)
+        nodes_arr[i].master_id = master_id;
+      } 
+      if(slave_id >= 0){
+        nodes_arr[i].slave_id = slave_id;
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void task_handle_report(void *arg){ //!NON TESTATA
+  while(1){
+    Msg* msg;
+    xQueueReceive(h_queue_handshake, &msg, portMAX_DELAY);
+    if(!(msg->type == type_handshake && msg->payload.payload_handshake.type == type_report_to_root)){
+      printf("ERRORE: type o handshake_type\n");
+      return;
+    }
+
+    int id = msg->payload.payload_handshake.my_id;
+    int master_id = msg->payload.payload_handshake.my_master_id;
+    int slave_id = msg->payload.payload_handshake.my_slave_id;
+
+    bool found = find_and_update(id, master_id, slave_id);
+    if(found == true && nodes_arr_len < NODES_ARR_SIZE){
+      nodes_arr[nodes_arr_len] = (node){.id=id, .master_id=master_id, .slave_id=slave_id};
+      find_and_update(master_id, -2, id);
+      nodes_arr_len +=1;
+    }
+    free(msg);
+  }
+}
+
 //* _______________________________________ MAIN e TEST
 
 void test(){
@@ -312,20 +360,23 @@ void test(){
   xQueueSend(h_queue_send_to_slave, &prova, portMAX_DELAY); 
 }
 
-
 void app_main(void){
   vTaskDelay(pdMS_TO_TICKS(1500)); //!1. FAI UPLOAD E MONITOR, 2.DAGLI IL TEMPO AL MONTOR DI PARTIRE
 
+  //*inizializzo le code
   //le code contengono punatori all'heap
   h_queue_command_01 = xQueueCreate(10, sizeof(Msg*));
   h_queue_command_02 = xQueueCreate(10, sizeof(Msg*));
+  h_queue_handshake = xQueueCreate(10, sizeof(Msg*));
   h_queue_send_to_slave = xQueueCreate(10, sizeof(Msg*));
   h_queue_send_to_master = xQueueCreate(10, sizeof(Msg*));
 
-  xTaskCreate(task_led, "task_led", 2048, NULL, 1, &h_task_led);
-  
+  //*inizializzo le UART
   init_uart(U_MASTER, U_MASTER_RX_PIN, U_MASTER_TX_PIN);
   init_uart(U_SLAVE, U_SLAVE_RX_PIN, U_SLAVE_TX_PIN);
+
+  //*creo le task
+  xTaskCreate(task_led, "task_led", 2048, NULL, 1, &h_task_led);
 
   InfoUART* info_receive_master = malloc(sizeof(InfoUART)); 
   info_receive_master->select_uart = U_MASTER;
@@ -348,8 +399,10 @@ void app_main(void){
   info_send_slave->select_queue = h_queue_send_to_slave;//predo da coda slave e invio a slave
   xTaskCreate(task_send_uart, "task_send_uart_slave", 5000, (void*)info_send_slave, 1, NULL);
 
-  //test
+  xTaskCreate(task_handle_report, "task_handle_report", 5000, NULL, 1, NULL); //!UNTESTED!!!
 
+
+  //*test
   SELF_ID = 2;
 
   if(SELF_ID == 1){ 

@@ -2,6 +2,8 @@
 typedef enum{
     type_command_01,
     type_command_02,
+    type_handshake,
+    NONE,
 }MsgType;
 
 typedef struct{
@@ -26,8 +28,9 @@ ROOT poi si rivede il dizionario aggiunge lui, e sistema my_master_id;
 */
 
 typedef enum{
-    hello,
-    statement_to_root,
+    type_hello,
+    type_report_to_root,
+    NONE,
 }HandshakeType;
 typedef struct{
     HandshakeType type;
@@ -41,6 +44,7 @@ typedef struct{
 typedef union{ 
     PayloadCommand01 payload_command_01;
     PayloadCommand02 payload_command_02;
+    PayloadHandshake payload_handshake;
 }Payload;
 
 typedef struct{
@@ -50,4 +54,30 @@ typedef struct{
 
     Payload payload;
 }Msg;
+
+
+const char* enum_to_str(MsgType msg_type, HandshakeType handshake_type){
+    if(msg_type != NONE){
+        switch (msg_type){
+        case type_command_01:
+            return "type_command_01";
+        case type_command_02:
+            return "type_command_02";
+        case type_handshake:
+            return "type_handshake";
+        default:
+            break;
+        }
+
+    }else if(handshake_type != NONE){
+        switch (handshake_type){
+        case type_hello:
+            return "type_hello";
+        case type_report_to_root:
+            return "type_report_to_root";
+        default:
+            break;
+        }
+    }
+} 
 
