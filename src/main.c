@@ -399,7 +399,8 @@ void app_main(void){
   info_send_slave->select_queue = h_queue_send_to_slave;//predo da coda slave e invio a slave
   xTaskCreate(task_send_uart, "task_send_uart_slave", 5000, (void*)info_send_slave, 1, NULL);
 
-  xTaskCreate(task_handle_report, "task_handle_report", 5000, NULL, 1, NULL); //!UNTESTED!!!
+  //todo solo root
+  // xTaskCreate(task_handle_report, "task_handle_report", 5000, NULL, 1, NULL); //!UNTESTED!!!
 
 
   //*test
