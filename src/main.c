@@ -23,9 +23,9 @@
 #define UNKNOWN_ID -1
 #define INVALID_ID -2 
 
-uint8_t MASTER_ID = 0; //li ho hardcodati nel mockup c'è un protocollo di hello che forse funziona
-uint8_t SELF_ID = 1;
-uint8_t SLAVE_ID = 2;
+int MASTER_ID = 0; //li ho hardcodati nel mockup c'è un protocollo di hello che forse funziona
+int SELF_ID = 1;
+int SLAVE_ID = 2;
 
 //handles:
 TaskHandle_t h_task_led;
@@ -272,7 +272,7 @@ void handle_hello(){
   if(msg->target_id == -1){
     if(SLAVE_ID == -1){
       SLAVE_ID = msg->payload.payload_handshake.my_id;
-      send_hello(SLAVE_ID);
+      send_handshake_msg(SLAVE_ID, type_hello);
     }else{
       printf("ERRORE: IO ho già uno slave\n");
     }

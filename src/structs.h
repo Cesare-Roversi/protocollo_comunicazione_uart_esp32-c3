@@ -3,7 +3,7 @@ typedef enum{
     type_command_01,
     type_command_02,
     type_handshake,
-    NONE,
+    type_no_msg_type,
 }MsgType;
 
 typedef struct{
@@ -30,7 +30,7 @@ ROOT poi si rivede il dizionario aggiunge lui, e sistema my_master_id;
 typedef enum{
     type_hello,
     type_report_to_root,
-    NONE,
+    type_no_handshake_type,
 }HandshakeType;
 typedef struct{
     HandshakeType type;
@@ -57,7 +57,7 @@ typedef struct{
 
 
 const char* enum_to_str(MsgType msg_type, HandshakeType handshake_type){
-    if(msg_type != NONE){
+    if(msg_type != type_no_msg_type){
         switch (msg_type){
         case type_command_01:
             return "type_command_01";
@@ -69,7 +69,7 @@ const char* enum_to_str(MsgType msg_type, HandshakeType handshake_type){
             break;
         }
 
-    }else if(handshake_type != NONE){
+    }else if(handshake_type != type_no_handshake_type){
         switch (handshake_type){
         case type_hello:
             return "type_hello";
@@ -79,5 +79,7 @@ const char* enum_to_str(MsgType msg_type, HandshakeType handshake_type){
             break;
         }
     }
+
+    return "ERROR in enum_to_str()";
 } 
 
