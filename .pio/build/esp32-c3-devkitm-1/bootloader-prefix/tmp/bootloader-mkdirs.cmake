@@ -10,18 +10,18 @@ if(NOT EXISTS "/home/cesarov/.platformio/packages/framework-espidf/components/bo
   file(MAKE_DIRECTORY "/home/cesarov/.platformio/packages/framework-espidf/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader"
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix"
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/tmp"
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp"
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src"
-  "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/tmp"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src"
+  "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

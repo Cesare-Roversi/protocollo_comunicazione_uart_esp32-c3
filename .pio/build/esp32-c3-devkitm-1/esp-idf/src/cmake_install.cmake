@@ -1,4 +1,4 @@
-# Install script for directory: /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/src
+# Install script for directory: /home/cesarov/Desktop/protocollo_uart/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

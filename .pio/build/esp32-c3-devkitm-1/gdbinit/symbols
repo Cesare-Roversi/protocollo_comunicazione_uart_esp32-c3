@@ -18,8 +18,8 @@ end
 
 # Load bootloader symbols
 set confirm off
-    add-symbol-file /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/bootloader/bootloader.elf
+    add-symbol-file /home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/bootloader/bootloader.elf
 set confirm on
 
 # Load application symbols
-file /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/prova_espidf.elf
+file /home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/prova_espidf.elf

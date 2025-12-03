@@ -1,4 +1,4 @@
-/* * Data converted from /home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/x509_crt_bundle
+/* * Data converted from /home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)

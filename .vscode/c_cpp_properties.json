@@ -8,10 +8,10 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/include",
-                "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/src",
+                "/home/cesarov/Desktop/protocollo_uart/include",
+                "/home/cesarov/Desktop/protocollo_uart/src",
                 "/home/cesarov/.platformio/packages/framework-espidf/components/riscv/include",
-                "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/config",
+                "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/config",
                 "/home/cesarov/.platformio/packages/framework-espidf/components/newlib/platform_include",
                 "/home/cesarov/.platformio/packages/framework-espidf/components/freertos/config/include",
                 "/home/cesarov/.platformio/packages/framework-espidf/components/freertos/config/include/freertos",
@@ -177,10 +177,10 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/include",
-                    "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/src",
+                    "/home/cesarov/Desktop/protocollo_uart/include",
+                    "/home/cesarov/Desktop/protocollo_uart/src",
                     "/home/cesarov/.platformio/packages/framework-espidf/components/riscv/include",
-                    "/home/cesarov/Desktop/OLDprogetto_embedded/prova_espidf/.pio/build/esp32-c3-devkitm-1/config",
+                    "/home/cesarov/Desktop/protocollo_uart/.pio/build/esp32-c3-devkitm-1/config",
                     "/home/cesarov/.platformio/packages/framework-espidf/components/newlib/platform_include",
                     "/home/cesarov/.platformio/packages/framework-espidf/components/freertos/config/include",
                     "/home/cesarov/.platformio/packages/framework-espidf/components/freertos/config/include/freertos",
