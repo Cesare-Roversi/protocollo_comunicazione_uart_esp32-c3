@@ -42,6 +42,8 @@ typedef struct {
 inline constexpr float trim= 0.07f*M_PI;
 inline constexpr float backlash= 15.0f/180.0f*M_PI; //trying to compensate for backlash by n degrees
 inline constexpr int servo_deadzone_ms=2;
+//extern keyword means that the variable is defined in another source file
+//and tells the compiler to not allocate memory for it in this file, but to look for its definition in the linked source files during the linking phase
 extern ServoData servo_data;
 extern float servo_deadzone;
 
