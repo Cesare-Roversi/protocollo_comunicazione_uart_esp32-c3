@@ -62,11 +62,8 @@ void sort_new_msg(Msg *msg){
         xQueueSend(h_queue_report, &msg, portMAX_DELAY);
     }else if(msg->type == type_servo){
         xQueueSend(h_queue_servo, &msg, portMAX_DELAY);
-    }else if(msg->type == type_servo_ack){ //! PROBLEMA - QUESTO FA SCHIFO
-        //TODO ideally call a function to handle it
-        printf("==================================================================\n");
-        printf("(DOVREI ESSERE ROOT SE NO è SBAGLIATO)\nSONO %d HO RICEVUTO type_servo_ack LO CANCELLO, IMPLEMENTALA STA FUNZIONE!!\n", SELF_ID);
-        printf("==================================================================\n");
+    }else if(msg->type == type_servo_ack){ 
+        
         free_msg(msg);
     }else{
         if(SHOW_UART_COMMS_LOGS)
