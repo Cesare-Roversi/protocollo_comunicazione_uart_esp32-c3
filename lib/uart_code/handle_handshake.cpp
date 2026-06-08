@@ -64,8 +64,8 @@ void task_ping_slave(void* info){ // mando MtS a slave
     /*
     type_MtS ->
     type_StM <-
-    *TIMEOUT - NO RESPONSE*
-    *Even if it doesnt have a response it knows not to delete the new slave
+    TIMEOUT - NO RESPONSE
+    Even if it doesnt have a response it knows not to delete the new slave
     */
     int SLAVE_ID_WHEN_I_SENT_THE_MESSAGE = SLAVE_ID; 
     send_msg_to_slave(msg);

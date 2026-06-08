@@ -240,7 +240,7 @@ molecubes/
 
 ## Resources 
 
-- YouTube: https://www.youtube.com/watch?v=YOUR_VIDEO_LINK
+- YouTube: https://www.youtube.com/watch?v=TO-N0g9IO8k
 - Presentation: https://www.example.com/presentation-link
 
 ## License

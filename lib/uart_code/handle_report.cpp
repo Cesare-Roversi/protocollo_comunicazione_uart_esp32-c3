@@ -34,7 +34,7 @@ void print_node_info(PayloadReport& p){
     cout << get_node_info(p) << endl;
 }
 
-/* Prints current state of ordered_chain and buffer (debug) */
+
 void print_ids_array(){
     cout << "PRINTING: IDS_ARRAY\n";
     for(int i = 0; i < ids_array_len; i++){
@@ -45,50 +45,54 @@ void print_ids_array(){
 
 
 void compute_ids_array(){
-    // Rebuild ids_array starting from ROOT_ID by searching for nodes that
-    // declare the current node as their master. This makes the algorithm
-    // independent from the order in which reports arrive and robust to
-    // temporary reordering.
     ids_array[0] = ROOT_ID; // ROOT_ID == 0
     ids_array_len = 1; // reset the array
 
-    // Track which nodes have already been appended to avoid loops
-    bool used[MAX_NODES];
-    for (int i = 0; i < MAX_NODES; ++i) used[i] = false;
-    used[ROOT_ID] = true;
+    // avoid loops
+    bool is_node_already_in_ids_array[MAX_NODES];
+    for (int i = 0; i < MAX_NODES; ++i){
+        is_node_already_in_ids_array[i] = false;
+    }
+    is_node_already_in_ids_array[ROOT_ID] = true;
 
     int curr_node_id = ROOT_ID;
-    for (int step = 0; step < MAX_NODES - 1; ++step) {
-        int found = -1;
-        // find a node j such that dict[j].my_master_id == curr_node_id
-        for (int j = 0; j < MAX_NODES; ++j) {
-            if (used[j]) continue;
-            if (is_dict_ix_empty[j]) continue;
+    for (int step = 0; step < MAX_NODES - 1; step++) {
+        int next_node_id = -1;
+        //find dict[j].my_master_id == curr_node_id
+        for (int j = 0; j < MAX_NODES; j++) {
+            if (is_node_already_in_ids_array[j]){
+                continue;
+            } 
+            if (is_dict_ix_empty[j]){ //non è mai arrivato un report con un SELF_ID == j
+                continue;
+            }
             if (dict[j].my_master_id == curr_node_id) {
-                found = j;
+                next_node_id = j;
                 break;
             }
         }
 
-        if (found == -1) break; // no successor found, chain ends here
-
-        // append found to ids_array
-        ids_array[ids_array_len++] = found;
-        used[found] = true;
-        curr_node_id = found;
+        if (next_node_id == -1){
+            break; //chain ends
+        }
+        
+        ids_array[ids_array_len] = next_node_id;
+        ids_array_len +=1;
+        is_node_already_in_ids_array[next_node_id] = true;
+        curr_node_id = next_node_id;
     }
 }
 
-// Remove entire subtree rooted at `node` from the dict. This function
-// recursively removes any entry j whose my_master_id == node, then marks
-// j as empty so it won't be reused when rebuilding the chain.
-void remove_subtree_recursive(int node) {
+
+void remove_subtree_recursive(int node_id) {
     for (int j = 0; j < MAX_NODES; ++j) {
-        if (is_dict_ix_empty[j]) continue;
-        if (dict[j].my_master_id == node) {
-            // remove children of j first
+        if (is_dict_ix_empty[j]){
+            continue;
+        }
+        if (dict[j].my_master_id == node_id) {
             remove_subtree_recursive(j);
-            // mark j as removed
+            
+            // rimuovi j
             is_dict_ix_empty[j] = true;
             dict[j].my_master_id = UNKNOWN_ID;
             dict[j].my_slave_id = UNKNOWN_ID;
@@ -102,10 +106,7 @@ void receive_new_report(PayloadReport p){
     dict[p.my_id] = p;
     is_dict_ix_empty[p.my_id] = false;
 
-    // If this node reports it has no slave, remove any subtree that was
-    // previously hanging below it. This ensures that when a parent node
-    // acknowledges it has no child, the root won't reuse stale reports
-    // from the old subtree.
+    
     if (p.my_slave_id == UNKNOWN_ID) {
         remove_subtree_recursive(p.my_id);
     }
