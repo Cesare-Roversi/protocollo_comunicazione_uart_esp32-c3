@@ -231,17 +231,19 @@ molecubes/
 - **Matteo Ballardin** — `matteo.ballardin@studenti.unitn.it`
   - Minor developer of the WiFi connectivity section
   - Minor developer of kinematics controls
+  - Slide and documentation mantainer
 - **Mattia Pistollato** — `mattia.pistollato@studenti.unitn.it`
   - 3D modelling of the cubes
   - Hand construction of the cubes
   - Major developer of kinematics controls
+  - Camera man and video editor
 - **Cesare Roversi** — `cesare.roversi@studenti.unitn.it`
   - Major developer of inter-cube connectivity
 
 ## Resources 
 
 - YouTube: https://www.youtube.com/watch?v=TO-N0g9IO8k
-- Presentation: https://www.example.com/presentation-link
+- Presentation: https://docs.google.com/presentation/d/1EzeCRdcIliSEbOmkrEr7zNEghcpyGPThB2PobICRaiw/edit?usp=sharing
 
 ## License
 
