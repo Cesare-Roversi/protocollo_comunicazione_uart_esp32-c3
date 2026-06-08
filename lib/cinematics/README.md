@@ -64,6 +64,99 @@ float decel_distance_sim(float v,float a,float A,float J,float Vmax){
 }
 ```
 
+FSM
+```c
+switch (phase) {
+  case PH_ACCEL_JUP:
+      //this means that we have just enough space to stop
+      if (rem <= d_trig) {
+          phase = PH_DECEL_JUP;
+          break; 
+      }
+      acc += j * dt; //updating acceleration
+      if (acc >= a) { //capping acceleration to a
+          acc = a;
+          // speed after ajerk-up phase
+          // if the speed after the jerk-up phase is higher than the target speed, we have to go directly to jerk-down (should not happen)
+          // otherwise we can enter the constant acceleration phase
+          float vp = vel + (a * a) / (2.0f * j);
+          if (vp >= v) {
+              phase = PH_ACCEL_JDN;
+          } else {
+              phase = PH_ACCEL_CONST;
+          }
+      } else {
+          // checking for overshoot
+          float vp = vel + (acc * acc) / (2.0f * j);
+          if (vp >= v) {
+              phase = PH_ACCEL_JDN;
+          }
+      }
+      break;
+
+  case PH_ACCEL_CONST:
+      // if we have just enough space to stop, we have to start decelerating
+      if (rem <= d_trig) { 
+          phase = PH_DECEL_JUP;
+          break;
+      }
+      // if with the deceleration the speed would be too high, we have to start reducing acceleration
+      if (vel + (a * a) / (2.0f * j) >= v) {
+          phase = PH_ACCEL_JDN;
+      }
+      break;
+    case PH_ACCEL_JDN:
+      // if we have just enough space to stop, we have to start decelerating
+      if (rem <= d_trig) { 
+          phase = PH_DECEL_JUP; 
+          break; 
+      }
+      acc -= j * dt;
+      if (acc <= 0.0f) {
+          acc = 0.0f;
+          vel = v;
+          phase = PH_CRUISE; //linear motion phase
+      }
+      break;
+
+  case PH_CRUISE:
+      // if we have just enough space to stop, we have to start decelerating
+      if (rem <= d_trig) {
+          phase = PH_DECEL_JUP;
+      }
+      break;
+
+  case PH_DECEL_JUP:
+      // starting deceleration ramp: acc goes from 0 to -a
+      acc -= j * dt;
+      if (acc < -a) acc = -a;
+      // in this case we have just enough space to stop, so we can skip the constant deceleration phase and go directly to jerk-down
+      if (vel <= (acc * acc) / (2.0f * j)) {
+          phase = PH_DECEL_JDN;       // triangular profile
+      } else if (acc <= -a) {
+          phase = PH_DECEL_CONST;     // trapezoidal profile
+      }
+      break;
+
+  case PH_DECEL_CONST:
+      // if we have just enough space to stop, we have to start reducing deceleration
+      if (vel <= (a * a) / (2.0f * j)) {
+          phase = PH_DECEL_JDN;
+      }
+      break;
+
+  case PH_DECEL_JDN:
+      // deceleration ramp: acc goes from -a to 0
+      acc += j * dt;
+      if (acc >= 0.0f) {
+          acc = 0.0f;
+          vel = 0.0f;
+          done = true;    // now we can stop, we have reached the target
+      }
+      break;
+  }
+```
+
 ## Testing
 - `lib/cinematics/tests.cpp` fornisce test funzionali: sweep, precision, reactivity (preemption), speed/acc/jerk coverage. I test sono stati eseguiti utilizzando un apposito environment di PlatformIO (`esp32-c3-test`) per caricare la funzione corretta.
 - Questi test usano funzioni di logging e controlli su servo_data.current_pos / current_speed / current_acc per rilevare uscita dai limiti e mismatch finale. Quindi le funzioni hardware independent sono state testate in software per quanto possibile.
