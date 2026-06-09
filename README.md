@@ -68,6 +68,10 @@ The system is controlled by an ESP32-C3 microcontroller in the base module, with
     <img src="assets/cube_1.png" alt="Cube 1" width="100" style="float: right; margin-left: 20px;">
     <img src="assets/cube_2.png" alt="Cube 2" width="100" style="float: right; margin-left: 20px;">
 </div>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <img src="assets/timelapse_3d_model.gif" alt="Creation"  >
+</div>
+
 
 ### Software Requirements 
 
